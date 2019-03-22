@@ -5,6 +5,8 @@ use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 use std::time::Duration;
 
+const ONE_SIXTIETH_OF_A_SECOND: Duration = Duration::new(0, 1_000_000_000u32 / 60);
+
 pub fn main() {
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
@@ -39,6 +41,6 @@ pub fn main() {
         // The rest of the game loop goes here...
 
         canvas.present();
-        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
+        ::std::thread::sleep(ONE_SIXTIETH_OF_A_SECOND);
     }
 }
