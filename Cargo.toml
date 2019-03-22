@@ -1,0 +1,7 @@
+[package]
+name = "fire"
+version = "0.1.0"
+authors = ["Hugo Josefson <hugo@josefson.org>"]
+edition = "2018"
+
+[dependencies]
