@@ -1,9 +1,6 @@
 #![feature(fixed_size_array)]
 extern crate sdl2;
 
-use ndarray::{Array2, ShapeBuilder};
-use ndarray::Dimension;
-use ndarray::Shape;
 use rand::Rng;
 use sdl2::event::Event;
 use sdl2::gfx::primitives::DrawRenderer;
@@ -11,7 +8,7 @@ use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
 
 const WIDTH: u32 = 800;
-const WIDTH_I16: i16 = 800;
+const WIDTH_USIZE: usize = 800;
 const HEIGHT: u32 = 600;
 const DATA_SIZE: usize = (WIDTH * (HEIGHT + 1)) as usize;
 const SCREEN_SIZE: usize = (WIDTH * HEIGHT) as usize;
@@ -39,21 +36,28 @@ pub fn main() {
         .unwrap();
 
     let mut canvas = window.into_canvas().present_vsync().build().unwrap();
-    let shape =
-    let f = |(x, y)| Cell {
-        x,
-        y,
-        color_index: rng.gen_range(0, 255),
-    };
-    let mut data = Array2::<Cell>::from_shape_fn(shape, f);
+    let mut data: Vec<Cell> = Vec::with_capacity(DATA_SIZE);
 
-    data.iter().for_each(|cell: &Cell| {
+    for pixel_index in 0..DATA_SIZE - 1 {
+        let x = pixel_index % WIDTH_USIZE;
+        let y = pixel_index / WIDTH_USIZE;
+        data.insert(
+            pixel_index,
+            Cell {
+                x,
+                y,
+                color_index: rng.gen_range(0, 255),
+            },
+        );
+    }
+
+    for cell in &data {
         canvas.pixel(
             cell.x as i16,
             cell.y as i16,
             color_from_index(cell.color_index),
         );
-    });
+    }
 
     canvas.present();
     let mut event_pump = sdl_context.event_pump().unwrap();
@@ -70,6 +74,13 @@ pub fn main() {
                 } => break 'running,
                 _ => {}
             }
+        }
+        for cell in &data {
+            canvas.pixel(
+                cell.x as i16,
+                cell.y as i16,
+                color_from_index(cell.color_index.wrapping_add(i)),
+            );
         }
 
         canvas.present();
