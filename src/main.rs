@@ -73,9 +73,9 @@ pub fn main() {
 
     canvas.present();
     let mut event_pump = sdl_context.event_pump().unwrap();
-    let mut i = 0;
+    let mut i: u8 = 0;
     'running: loop {
-        i = (i + 1) % 255;
+        i = i.wrapping_add(1);
 
         for event in event_pump.poll_iter() {
             match event {
