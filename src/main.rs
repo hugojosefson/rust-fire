@@ -14,7 +14,6 @@ const WIDTH_USIZE: usize = 800;
 const HEIGHT: u32 = 600;
 const DATA_SIZE: usize = (WIDTH * (HEIGHT + 1)) as usize;
 const SCREEN_SIZE: usize = (WIDTH * HEIGHT) as usize;
-const SCREEN_SIZE_MINUS_1: usize = SCREEN_SIZE - 1;
 
 fn color_from_index(i: u8) -> Color {
     Color::from((i, i >> 1, i >> 2))
@@ -26,17 +25,18 @@ struct Cell {
     color_index: u8,
 }
 
-fn draw(canvas: &Canvas<Window>, data: &Vec<Cell>) {
+fn draw(canvas: &Canvas<Window>, data: &Vec<Cell>) -> Result<(), String> {
     for cell in data {
         canvas.pixel(
             cell.x as i16,
             cell.y as i16,
             color_from_index(cell.color_index),
-        );
+        )?;
     }
+    Ok(())
 }
 
-pub fn main() {
+pub fn main() -> Result<(), String> {
     let mut rng = rand::thread_rng();
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
@@ -67,15 +67,6 @@ pub fn main() {
         );
     }
 
-    for cell in &data {
-        canvas.pixel(
-            cell.x as i16,
-            cell.y as i16,
-            color_from_index(cell.color_index),
-        );
-    }
-
-    canvas.present();
     let mut event_pump = sdl_context.event_pump().unwrap();
     let mut i: u8 = 0;
     'running: loop {
@@ -91,8 +82,9 @@ pub fn main() {
         }
 
         i = i.wrapping_add(1);
-        draw(&canvas, &data);
+        draw(&canvas, &data)?;
 
         canvas.present();
     }
+    Ok(())
 }
