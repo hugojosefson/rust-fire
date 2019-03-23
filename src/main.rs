@@ -9,11 +9,11 @@ use sdl2::pixels::Color;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 
-const WIDTH: u32 = 800;
-const WIDTH_USIZE: usize = 800;
-const HEIGHT: u32 = 600;
-const DATA_SIZE: usize = (WIDTH * (HEIGHT + 1)) as usize;
-const SCREEN_SIZE: usize = (WIDTH * HEIGHT) as usize;
+const WIDTH_U32: u32 = 800;
+const WIDTH: usize = 800;
+const HEIGHT_U32: u32 = 600;
+const DATA_SIZE: usize = (WIDTH_U32 * (HEIGHT_U32 + 1)) as usize;
+const SCREEN_SIZE: usize = (WIDTH_U32 * HEIGHT_U32) as usize;
 
 fn color_from_index(i: u8) -> Color {
     Color::from((i, i >> 1, i >> 2))
@@ -42,7 +42,7 @@ pub fn main() -> Result<(), String> {
     let video_subsystem = sdl_context.video().unwrap();
 
     let window = video_subsystem
-        .window("fire", WIDTH, HEIGHT)
+        .window("fire", WIDTH_U32, HEIGHT_U32)
         .position_centered()
         .build()
         .unwrap();
@@ -51,8 +51,8 @@ pub fn main() -> Result<(), String> {
     let mut data: Vec<Cell> = Vec::with_capacity(DATA_SIZE);
 
     for pixel_index in 0..DATA_SIZE - 1 {
-        let x = pixel_index % WIDTH_USIZE;
-        let y = pixel_index / WIDTH_USIZE;
+        let x = pixel_index % WIDTH;
+        let y = pixel_index / WIDTH;
         let color_index = if pixel_index < SCREEN_SIZE {
             0
         } else {
@@ -76,6 +76,26 @@ pub fn main() -> Result<(), String> {
 
         for mut cell in &mut data[SCREEN_SIZE..] {
             cell.color_index = cell.color_index.wrapping_add(1);
+        }
+        for pixel_index in WIDTH + 1..SCREEN_SIZE - 2 {
+            let up_left = data[pixel_index - WIDTH - 1].color_index;
+            let up = data[pixel_index - WIDTH].color_index;
+            let up_right = data[pixel_index - WIDTH + 1].color_index;
+            let down_left = data[pixel_index + WIDTH - 1].color_index;
+            let down = data[pixel_index + WIDTH].color_index;
+            let down_right = data[pixel_index + WIDTH + 1].color_index;
+            let left = data[pixel_index - 1].color_index;
+            let right = data[pixel_index + 1].color_index;
+            let color_index: u8 = ((up_left as u32
+                + up as u32
+                + up_right as u32
+                + down_left as u32
+                + down as u32
+                + down_right as u32
+                + left as u32
+                + right as u32)
+                / 8) as u8;
+            data[pixel_index].color_index = color_index;
         }
         draw(&canvas, &data)?;
 
