@@ -6,6 +6,8 @@ use sdl2::event::Event;
 use sdl2::gfx::primitives::DrawRenderer;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
+use sdl2::render::Canvas;
+use sdl2::video::Window;
 
 const WIDTH: u32 = 800;
 const WIDTH_USIZE: usize = 800;
@@ -22,6 +24,16 @@ struct Cell {
     x: usize,
     y: usize,
     color_index: u8,
+}
+
+fn draw(canvas: &Canvas<Window>, data: &Vec<Cell>) {
+    for cell in data {
+        canvas.pixel(
+            cell.x as i16,
+            cell.y as i16,
+            color_from_index(cell.color_index),
+        );
+    }
 }
 
 pub fn main() {
@@ -75,13 +87,7 @@ pub fn main() {
                 _ => {}
             }
         }
-        for cell in &data {
-            canvas.pixel(
-                cell.x as i16,
-                cell.y as i16,
-                color_from_index(cell.color_index.wrapping_add(i)),
-            );
-        }
+        draw(&canvas, &data);
 
         canvas.present();
     }
