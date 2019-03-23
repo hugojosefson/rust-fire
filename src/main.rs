@@ -1,4 +1,3 @@
-#![feature(fixed_size_array)]
 extern crate sdl2;
 
 use rand::prelude::ThreadRng;
