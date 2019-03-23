@@ -43,7 +43,7 @@ pub fn main() -> Result<(), String> {
 
     let window = video_subsystem
         .window("fire", WIDTH_U32, HEIGHT_U32)
-        .position_centered()
+        .fullscreen()
         .build()
         .unwrap();
 
