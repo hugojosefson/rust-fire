@@ -1,6 +1,7 @@
 #![feature(fixed_size_array)]
 extern crate sdl2;
 
+use rand::prelude::ThreadRng;
 use rand::Rng;
 use sdl2::event::Event;
 use sdl2::gfx::primitives::DrawRenderer;
@@ -23,6 +24,16 @@ struct Cell {
     x: usize,
     y: usize,
     color_index: u8,
+}
+
+fn cycle_generator(rng: &mut ThreadRng, data: &mut Vec<Cell>) {
+    for mut cell in &mut data[SCREEN_SIZE..] {
+        cell.color_index = if cell.color_index < 255 {
+            cell.color_index.wrapping_add(1)
+        } else {
+            rng.gen_range(0, 255)
+        };
+    }
 }
 
 fn draw(canvas: &Canvas<Window>, data: &Vec<Cell>) -> Result<(), String> {
@@ -74,13 +85,7 @@ pub fn main() -> Result<(), String> {
             }
         }
 
-        for mut cell in &mut data[SCREEN_SIZE..] {
-            cell.color_index = if cell.color_index < 255 {
-                cell.color_index.wrapping_add(1)
-            } else {
-                rng.gen_range(0, 255)
-            };
-        }
+        cycle_generator(&mut rng, &mut data);
         for pixel_index in WIDTH + 1..SCREEN_SIZE - WIDTH - 2 {
             let up_left = data[pixel_index + WIDTH - WIDTH - 1].color_index;
             let up = data[pixel_index + WIDTH - WIDTH].color_index;
