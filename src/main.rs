@@ -37,15 +37,15 @@ fn cycle_generator(rng: &mut ThreadRng, data: &mut Vec<Cell>) {
 }
 
 fn burn_screen(data: &mut Vec<Cell>) {
-    for pixel_index in WIDTH + 1..SCREEN_SIZE - WIDTH - 2 {
-        let up_left = data[pixel_index + WIDTH - WIDTH - 1].color_index;
-        let up = data[pixel_index + WIDTH - WIDTH].color_index;
-        let up_right = data[pixel_index + WIDTH - WIDTH + 1].color_index;
-        let down_left = data[pixel_index + WIDTH + WIDTH - 1].color_index;
-        let down = data[pixel_index + WIDTH + WIDTH].color_index;
-        let down_right = data[pixel_index + WIDTH + WIDTH + 1].color_index;
-        let left = data[pixel_index + WIDTH - 1].color_index;
-        let right = data[pixel_index + WIDTH + 1].color_index;
+    for i in WIDTH + 1..SCREEN_SIZE - WIDTH - 2 {
+        let up_left = data[i - 1].color_index;
+        let up = data[i].color_index;
+        let up_right = data[i + 1].color_index;
+        let left = data[i + WIDTH - 1].color_index;
+        let right = data[i + WIDTH + 1].color_index;
+        let down_left = data[i + 2 * WIDTH - 1].color_index;
+        let down = data[i + 2 * WIDTH].color_index;
+        let down_right = data[i + 2 * WIDTH + 1].color_index;
         let color_index: u8 = ((up_left as u32
             + up as u32
             + up_right as u32
@@ -55,17 +55,19 @@ fn burn_screen(data: &mut Vec<Cell>) {
             + left as u32
             + right as u32)
             / 8) as u8;
-        data[pixel_index].color_index = color_index;
+        data[i].color_index = color_index;
     }
 }
 
 fn draw(canvas: &Canvas<Window>, data: &Vec<Cell>) -> Result<(), String> {
     for cell in data {
-        canvas.pixel(
-            cell.x as i16,
-            cell.y as i16,
-            color_from_index(cell.color_index),
-        )?;
+        let color = color_from_index(cell.color_index);
+        let x: i16 = (cell.x * 2) as i16;
+        let y: i16 = (cell.y * 2) as i16;
+        canvas.pixel(x, y, color)?;
+        canvas.pixel(x, y + 1, color)?;
+        canvas.pixel(x + 1, y + 1, color)?;
+        canvas.pixel(x + 1, y, color)?;
     }
     Ok(())
 }
@@ -76,7 +78,7 @@ pub fn main() -> Result<(), String> {
     let video_subsystem = sdl_context.video().unwrap();
 
     let window = video_subsystem
-        .window("fire", WIDTH_U32, HEIGHT_U32)
+        .window("fire", WIDTH_U32 * 2 + 1, HEIGHT_U32 * 2 + 1)
         .fullscreen()
         .build()
         .unwrap();
