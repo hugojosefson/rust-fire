@@ -77,15 +77,15 @@ pub fn main() -> Result<(), String> {
         for mut cell in &mut data[SCREEN_SIZE..] {
             cell.color_index = cell.color_index.wrapping_add(1);
         }
-        for pixel_index in WIDTH + 1..SCREEN_SIZE - 2 {
-            let up_left = data[pixel_index - WIDTH - 1].color_index;
-            let up = data[pixel_index - WIDTH].color_index;
-            let up_right = data[pixel_index - WIDTH + 1].color_index;
-            let down_left = data[pixel_index + WIDTH - 1].color_index;
-            let down = data[pixel_index + WIDTH].color_index;
-            let down_right = data[pixel_index + WIDTH + 1].color_index;
-            let left = data[pixel_index - 1].color_index;
-            let right = data[pixel_index + 1].color_index;
+        for pixel_index in WIDTH + 1..SCREEN_SIZE - WIDTH - 2 {
+            let up_left = data[pixel_index + WIDTH - WIDTH - 1].color_index;
+            let up = data[pixel_index + WIDTH - WIDTH].color_index;
+            let up_right = data[pixel_index + WIDTH - WIDTH + 1].color_index;
+            let down_left = data[pixel_index + WIDTH + WIDTH - 1].color_index;
+            let down = data[pixel_index + WIDTH + WIDTH].color_index;
+            let down_right = data[pixel_index + WIDTH + WIDTH + 1].color_index;
+            let left = data[pixel_index + WIDTH - 1].color_index;
+            let right = data[pixel_index + WIDTH + 1].color_index;
             let color_index: u8 = ((up_left as u32
                 + up as u32
                 + up_right as u32
