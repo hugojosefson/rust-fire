@@ -31,7 +31,7 @@ fn cycle_generator(rng: &mut ThreadRng, data: &mut Vec<Cell>) {
         cell.color_index = if cell.color_index < 255 {
             cell.color_index.wrapping_add(1)
         } else {
-            rng.gen_range(0, 255)
+            rng.gen_range(64 + 16, 255)
         };
     }
 }
