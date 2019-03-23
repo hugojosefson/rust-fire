@@ -36,6 +36,29 @@ fn cycle_generator(rng: &mut ThreadRng, data: &mut Vec<Cell>) {
     }
 }
 
+fn burn_screen(data: &mut Vec<Cell>) {
+    for pixel_index in WIDTH + 1..SCREEN_SIZE - WIDTH - 2 {
+        let up_left = data[pixel_index + WIDTH - WIDTH - 1].color_index;
+        let up = data[pixel_index + WIDTH - WIDTH].color_index;
+        let up_right = data[pixel_index + WIDTH - WIDTH + 1].color_index;
+        let down_left = data[pixel_index + WIDTH + WIDTH - 1].color_index;
+        let down = data[pixel_index + WIDTH + WIDTH].color_index;
+        let down_right = data[pixel_index + WIDTH + WIDTH + 1].color_index;
+        let left = data[pixel_index + WIDTH - 1].color_index;
+        let right = data[pixel_index + WIDTH + 1].color_index;
+        let color_index: u8 = ((up_left as u32
+            + up as u32
+            + up_right as u32
+            + down_left as u32
+            + down as u32
+            + down_right as u32
+            + left as u32
+            + right as u32)
+            / 8) as u8;
+        data[pixel_index].color_index = color_index;
+    }
+}
+
 fn draw(canvas: &Canvas<Window>, data: &Vec<Cell>) -> Result<(), String> {
     for cell in data {
         canvas.pixel(
@@ -86,26 +109,7 @@ pub fn main() -> Result<(), String> {
         }
 
         cycle_generator(&mut rng, &mut data);
-        for pixel_index in WIDTH + 1..SCREEN_SIZE - WIDTH - 2 {
-            let up_left = data[pixel_index + WIDTH - WIDTH - 1].color_index;
-            let up = data[pixel_index + WIDTH - WIDTH].color_index;
-            let up_right = data[pixel_index + WIDTH - WIDTH + 1].color_index;
-            let down_left = data[pixel_index + WIDTH + WIDTH - 1].color_index;
-            let down = data[pixel_index + WIDTH + WIDTH].color_index;
-            let down_right = data[pixel_index + WIDTH + WIDTH + 1].color_index;
-            let left = data[pixel_index + WIDTH - 1].color_index;
-            let right = data[pixel_index + WIDTH + 1].color_index;
-            let color_index: u8 = ((up_left as u32
-                + up as u32
-                + up_right as u32
-                + down_left as u32
-                + down as u32
-                + down_right as u32
-                + left as u32
-                + right as u32)
-                / 8) as u8;
-            data[pixel_index].color_index = color_index;
-        }
+        burn_screen(&mut data);
         draw(&canvas, &data)?;
 
         canvas.present();
