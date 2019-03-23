@@ -53,22 +53,15 @@ pub fn main() -> Result<(), String> {
     for pixel_index in 0..DATA_SIZE - 1 {
         let x = pixel_index % WIDTH_USIZE;
         let y = pixel_index / WIDTH_USIZE;
-        data.insert(
-            pixel_index,
-            Cell {
-                x,
-                y,
-                color_index: if pixel_index < SCREEN_SIZE {
-                    0
-                } else {
-                    rng.gen_range(0, 255)
-                },
-            },
-        );
+        let color_index = if pixel_index < SCREEN_SIZE {
+            0
+        } else {
+            rng.gen_range(0, 255)
+        };
+        data.insert(pixel_index, Cell { x, y, color_index });
     }
 
     let mut event_pump = sdl_context.event_pump().unwrap();
-    let mut i: u8 = 0;
     'running: loop {
         for event in event_pump.poll_iter() {
             match event {
@@ -81,7 +74,9 @@ pub fn main() -> Result<(), String> {
             }
         }
 
-        i = i.wrapping_add(1);
+        for mut cell in &mut data[SCREEN_SIZE..] {
+            cell.color_index = cell.color_index.wrapping_add(1);
+        }
         draw(&canvas, &data)?;
 
         canvas.present();
