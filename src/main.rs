@@ -58,7 +58,11 @@ pub fn main() {
             Cell {
                 x,
                 y,
-                color_index: rng.gen_range(0, 255),
+                color_index: if pixel_index < SCREEN_SIZE {
+                    0
+                } else {
+                    rng.gen_range(0, 255)
+                },
             },
         );
     }
