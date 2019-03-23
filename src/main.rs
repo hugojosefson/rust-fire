@@ -75,8 +75,6 @@ pub fn main() {
     let mut event_pump = sdl_context.event_pump().unwrap();
     let mut i: u8 = 0;
     'running: loop {
-        i = i.wrapping_add(1);
-
         for event in event_pump.poll_iter() {
             match event {
                 Event::Quit { .. }
@@ -87,6 +85,8 @@ pub fn main() {
                 _ => {}
             }
         }
+
+        i = i.wrapping_add(1);
         draw(&canvas, &data);
 
         canvas.present();
