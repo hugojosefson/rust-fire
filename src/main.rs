@@ -15,37 +15,31 @@ const HEIGHT_U32: u32 = 200;
 const DATA_SIZE: usize = (WIDTH_U32 * (HEIGHT_U32 + 1)) as usize;
 const SCREEN_SIZE: usize = (WIDTH_U32 * HEIGHT_U32) as usize;
 
-fn color_from_index(i: u8) -> Color {
-    Color::from((i, i >> 1, i >> 2))
+fn color_from_index(ci: u8) -> Color {
+    Color::from((ci, ci >> 1, ci >> 2))
 }
 
-struct Cell {
-    x: usize,
-    y: usize,
-    color_index: u8,
-}
-
-fn cycle_generator(rng: &mut ThreadRng, data: &mut Vec<Cell>) {
-    for mut cell in &mut data[SCREEN_SIZE..] {
-        cell.color_index = if cell.color_index < 255 {
-            cell.color_index.wrapping_add(1)
+fn cycle_generator(rng: &mut ThreadRng, data: &mut Vec<u8>) {
+    for i in SCREEN_SIZE..DATA_SIZE - 1 {
+        if data[i] < 255 {
+            data[i] = data[i] + 1
         } else {
-            rng.gen_range(64 + 16, 255)
-        };
+            data[i] = rng.gen_range(64 + 16, 255)
+        }
     }
 }
 
-fn burn_screen(data: &mut Vec<Cell>) {
+fn burn_screen(data: &mut Vec<u8>) {
     for i in WIDTH + 1..SCREEN_SIZE - WIDTH - 2 {
-        let up_left = data[i - 1].color_index;
-        let up = data[i].color_index;
-        let up_right = data[i + 1].color_index;
-        let left = data[i + WIDTH - 1].color_index;
-        let right = data[i + WIDTH + 1].color_index;
-        let down_left = data[i + 2 * WIDTH - 1].color_index;
-        let down = data[i + 2 * WIDTH].color_index;
-        let down_right = data[i + 2 * WIDTH + 1].color_index;
-        let color_index: u8 = ((up_left as u32
+        let up_left = data[i - 1];
+        let up = data[i];
+        let up_right = data[i + 1];
+        let left = data[i + WIDTH - 1];
+        let right = data[i + WIDTH + 1];
+        let down_left = data[i + 2 * WIDTH - 1];
+        let down = data[i + 2 * WIDTH];
+        let down_right = data[i + 2 * WIDTH + 1];
+        let burnt: u8 = ((up_left as u32
             + up as u32
             + up_right as u32
             + down_left as u32
@@ -54,15 +48,16 @@ fn burn_screen(data: &mut Vec<Cell>) {
             + left as u32
             + right as u32)
             / 8) as u8;
-        data[i].color_index = color_index;
+        data[i] = burnt;
     }
 }
 
-fn draw(canvas: &Canvas<Window>, data: &Vec<Cell>) -> Result<(), String> {
-    for cell in data {
-        let color = color_from_index(cell.color_index);
-        let x: i16 = (cell.x * 2) as i16;
-        let y: i16 = (cell.y * 2) as i16;
+fn draw(canvas: &Canvas<Window>, data: &Vec<u8>) -> Result<(), String> {
+    for i in 0..DATA_SIZE - 1 {
+        let color = color_from_index(data[i]);
+        let x: i16 = ((i % WIDTH) * 2) as i16;
+        let y: i16 = ((i / WIDTH) * 2) as i16;
+
         canvas.pixel(x, y, color)?;
         canvas.pixel(x, y + 1, color)?;
         canvas.pixel(x + 1, y + 1, color)?;
@@ -83,17 +78,15 @@ pub fn main() -> Result<(), String> {
         .unwrap();
 
     let mut canvas = window.into_canvas().present_vsync().build().unwrap();
-    let mut data: Vec<Cell> = Vec::with_capacity(DATA_SIZE);
+    let mut data: Vec<u8> = Vec::with_capacity(DATA_SIZE);
 
-    for pixel_index in 0..DATA_SIZE - 1 {
-        let x = pixel_index % WIDTH;
-        let y = pixel_index / WIDTH;
-        let color_index = if pixel_index < SCREEN_SIZE {
+    for i in 0..DATA_SIZE - 1 {
+        let color_index = if i < SCREEN_SIZE {
             0
         } else {
             rng.gen_range(0, 255)
         };
-        data.insert(pixel_index, Cell { x, y, color_index });
+        data.insert(i, color_index);
     }
 
     let mut event_pump = sdl_context.event_pump().unwrap();
