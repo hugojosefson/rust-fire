@@ -9,9 +9,9 @@ use sdl2::pixels::Color;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 
-const WIDTH_U32: u32 = 800;
-const WIDTH: usize = 800;
-const HEIGHT_U32: u32 = 600;
+const WIDTH_U32: u32 = 320;
+const WIDTH: usize = WIDTH_U32 as usize;
+const HEIGHT_U32: u32 = 200;
 const DATA_SIZE: usize = (WIDTH_U32 * (HEIGHT_U32 + 1)) as usize;
 const SCREEN_SIZE: usize = (WIDTH_U32 * HEIGHT_U32) as usize;
 
@@ -75,7 +75,11 @@ pub fn main() -> Result<(), String> {
         }
 
         for mut cell in &mut data[SCREEN_SIZE..] {
-            cell.color_index = cell.color_index.wrapping_add(1);
+            cell.color_index = if cell.color_index < 255 {
+                cell.color_index.wrapping_add(1)
+            } else {
+                rng.gen_range(0, 255)
+            };
         }
         for pixel_index in WIDTH + 1..SCREEN_SIZE - WIDTH - 2 {
             let up_left = data[pixel_index + WIDTH - WIDTH - 1].color_index;
