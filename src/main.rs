@@ -8,8 +8,8 @@ use rand::prelude::ThreadRng;
 use rand::Rng;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-use sdl2::render::Texture;
-use std::slice::Iter;
+use sdl2::render::{Canvas, Texture};
+use sdl2::video::Window;
 
 const WIDTH_U32: u32 = 320;
 const WIDTH: usize = WIDTH_U32 as usize;
@@ -19,7 +19,7 @@ const PIXEL_DATA_SIZE: usize = DATA_SIZE * 4 as usize;
 const SCREEN_SIZE: usize = (WIDTH_U32 * HEIGHT_U32) as usize;
 
 #[flame]
-fn cycle_generator(rng: &mut ThreadRng, data: &mut Vec<u8>) {
+fn cycle_generator(rng: &mut ThreadRng, data: &mut Vec<u32>) {
     for i in SCREEN_SIZE..DATA_SIZE - 1 {
         if data[i] < 255 {
             data[i] = data[i] + 1
@@ -30,55 +30,49 @@ fn cycle_generator(rng: &mut ThreadRng, data: &mut Vec<u8>) {
 }
 
 #[flame]
-fn burn_screen(data: &mut Vec<u8>) {
-    for i in WIDTH + 1..SCREEN_SIZE - WIDTH - 2 {
-        let up_left = data[i - 1];
-        let up = data[i];
-        let up_right = data[i + 1];
-        let left = data[i + WIDTH - 1];
-        let right = data[i + WIDTH + 1];
-        let down_left = data[i + 2 * WIDTH - 1];
-        let down = data[i + 2 * WIDTH];
-        let down_right = data[i + 2 * WIDTH + 1];
-        let burnt: u8 = ((up_left as u32
-            + up as u32
-            + up_right as u32
-            + down_left as u32
-            + down as u32
-            + down_right as u32
-            + left as u32
-            + right as u32)
-            / 8) as u8;
-        data[i] = burnt;
+fn burn_screen(data: &mut Vec<u32>) {
+    let mut sum: u32;
+    for i in WIDTH + 1..SCREEN_SIZE - WIDTH - 1 {
+        sum = data[i - 1];
+        sum += data[i];
+        sum += data[i + 1];
+        sum += data[i + WIDTH - 1];
+        sum += data[i + WIDTH + 1];
+        sum += data[i + 2 * WIDTH - 1];
+        sum += data[i + 2 * WIDTH];
+        sum += data[i + 2 * WIDTH + 1];
+        data[i] = sum / 8;
     }
 }
 
-fn color_from_index(color_index: &u8) -> Vec<u8> {
-    let color_index: u8 = *color_index;
-    vec![
-        color_index >> 2, // blue
-        color_index >> 1, // green
-        color_index >> 0, // red
-        0u8,              // unused (alpha?)
-    ]
-}
-
 #[flame]
-fn color_indices_to_pixel_data(color_indices: &Vec<u8>, pixel_data: &mut [u8]) {
-    let iterator: Iter<u8> = color_indices.iter();
-    iterator
-        .flat_map(color_from_index)
+fn color_indices_to_pixel_data(color_indices: &Vec<u32>, pixel_data: &mut [u8]) {
+    color_indices
+        .iter()
         .enumerate()
-        .for_each(|(i, byte)| pixel_data[i] = byte)
+        .for_each(|(i, &color_index)| {
+            let pixels: [u8; 4] = [
+                (color_index >> 2) as u8,
+                (color_index >> 1) as u8,
+                (color_index) as u8,
+                0u8,
+            ];
+            pixel_data[i * 4..i * 4 + 4].copy_from_slice(&pixels);
+        });
 }
 
 #[flame]
-fn draw(texture: &mut Texture, pixel_data: &[u8]) -> Result<(), String> {
+fn draw_to_texture(texture: &mut Texture, pixel_data: &[u8]) -> Result<(), String> {
     texture
         .update(None, pixel_data, WIDTH)
         .map_err(|e| e.to_string())?;
 
     Ok(())
+}
+
+#[flame]
+fn draw_to_canvas(canvas: &mut Canvas<Window>, texture: &mut Texture) -> Result<(), String> {
+    canvas.copy(&texture, None, None)
 }
 
 #[flame]
@@ -98,9 +92,9 @@ fn fire() -> Result<(), String> {
         .create_texture_streaming(None, WIDTH_U32, HEIGHT_U32)
         .map_err(|e| e.to_string())?;
 
-    let mut data: Vec<u8> = Vec::with_capacity(DATA_SIZE);
+    let mut data: Vec<u32> = Vec::with_capacity(DATA_SIZE);
     let mut pixel_data: [u8; PIXEL_DATA_SIZE] = [0; PIXEL_DATA_SIZE];
-    for i in 0..DATA_SIZE - 1 {
+    for i in 0..DATA_SIZE {
         let color_index = if i < SCREEN_SIZE {
             0 + rng.gen_range(64 + 16, 255)
         } else {
@@ -125,8 +119,8 @@ fn fire() -> Result<(), String> {
         burn_screen(&mut data);
 
         color_indices_to_pixel_data(&data, &mut pixel_data);
-        draw(&mut texture, &pixel_data)?;
-        canvas.copy(&texture, None, None)?;
+        draw_to_texture(&mut texture, &pixel_data)?;
+        draw_to_canvas(&mut canvas, &mut texture)?;
         canvas.present();
     }
     Ok(())
