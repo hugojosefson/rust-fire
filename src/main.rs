@@ -19,7 +19,7 @@ const PIXEL_DATA_SIZE: usize = DATA_SIZE * 4 as usize;
 const SCREEN_SIZE: usize = (WIDTH_U32 * HEIGHT_U32) as usize;
 
 #[flame]
-fn cycle_generator(rng: &mut ThreadRng, data: &mut Vec<u32>) {
+fn cycle_generator(rng: &mut ThreadRng, data: &mut [u32]) {
     for i in SCREEN_SIZE..DATA_SIZE - 1 {
         if data[i] < 255 {
             data[i] = data[i] + 1
@@ -30,7 +30,7 @@ fn cycle_generator(rng: &mut ThreadRng, data: &mut Vec<u32>) {
 }
 
 #[flame]
-fn burn_screen(data: &mut Vec<u32>) {
+fn burn_screen(data: &mut [u32]) {
     let mut sum: u32;
     for i in WIDTH + 1..SCREEN_SIZE - WIDTH - 1 {
         sum = data[i - 1];
@@ -41,12 +41,13 @@ fn burn_screen(data: &mut Vec<u32>) {
         sum += data[i + 2 * WIDTH - 1];
         sum += data[i + 2 * WIDTH];
         sum += data[i + 2 * WIDTH + 1];
-        data[i] = sum / 8;
+        sum /= 8;
+        data[i] = sum
     }
 }
 
 #[flame]
-fn color_indices_to_pixel_data(color_indices: &Vec<u32>, pixel_data: &mut [u8]) {
+fn color_indices_to_pixel_data(color_indices: &[u32], pixel_data: &mut [u8]) {
     color_indices
         .iter()
         .enumerate()
@@ -64,7 +65,7 @@ fn color_indices_to_pixel_data(color_indices: &Vec<u32>, pixel_data: &mut [u8]) 
 #[flame]
 fn draw_to_texture(texture: &mut Texture, pixel_data: &[u8]) -> Result<(), String> {
     texture
-        .update(None, pixel_data, WIDTH)
+        .update(None, pixel_data, WIDTH * 4)
         .map_err(|e| e.to_string())?;
 
     Ok(())
@@ -81,7 +82,7 @@ fn fire() -> Result<(), String> {
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
     let window = video_subsystem
-        .window("fire", WIDTH_U32, HEIGHT_U32)
+        .window("fire", WIDTH_U32 * 4, HEIGHT_U32 * 4)
         .position_centered()
         .build()
         .unwrap();
@@ -92,15 +93,10 @@ fn fire() -> Result<(), String> {
         .create_texture_streaming(None, WIDTH_U32, HEIGHT_U32)
         .map_err(|e| e.to_string())?;
 
-    let mut data: Vec<u32> = Vec::with_capacity(DATA_SIZE);
+    let mut data: [u32; DATA_SIZE] = [0; DATA_SIZE];
     let mut pixel_data: [u8; PIXEL_DATA_SIZE] = [0; PIXEL_DATA_SIZE];
-    for i in 0..DATA_SIZE {
-        let color_index = if i < SCREEN_SIZE {
-            0 + rng.gen_range(64 + 16, 255)
-        } else {
-            rng.gen_range(64 + 16, 255)
-        };
-        data.insert(i, color_index);
+    for i in SCREEN_SIZE..DATA_SIZE {
+        data[i] = rng.gen_range(64 + 16, 255);
     }
     let mut event_pump = sdl_context.event_pump().unwrap();
     'running: loop {
