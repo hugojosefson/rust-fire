@@ -72,7 +72,8 @@ fn fire() -> Result<(), String> {
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
     let window = video_subsystem
-        .window("fire", WIDTH_U32 * 4, HEIGHT_U32 * 4)
+        .window("fire", WIDTH_U32, HEIGHT_U32)
+        .resizable()
         .position_centered()
         .build()
         .unwrap();
