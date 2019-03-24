@@ -71,7 +71,7 @@ fn fire() -> Result<(), String> {
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
     let window = video_subsystem
-        .window("fire", WIDTH_U32, HEIGHT_U32)
+        .window("fire", WIDTH_U32, VISIBLE_HEIGHT_U32)
         .resizable()
         .position_centered()
         .build()
@@ -80,7 +80,7 @@ fn fire() -> Result<(), String> {
     let texture_creator = canvas.texture_creator();
 
     let mut texture: Texture = texture_creator
-        .create_texture_streaming(None, WIDTH_U32, HEIGHT_U32)
+        .create_texture_streaming(None, WIDTH_U32, VISIBLE_HEIGHT_U32)
         .map_err(|e| e.to_string())?;
 
     let palette = create_palette();
@@ -121,7 +121,7 @@ fn fire() -> Result<(), String> {
         generator::cycle(&mut rng, &mut generator);
         burn_screen(&mut data, &generator);
 
-        color_indices_to_pixel_data(&palette, &data, &mut pixel_data);
+        color_indices_to_pixel_data(&palette, &data[0..VISIBLE_DATA_SIZE], &mut pixel_data);
         draw_to_texture(&mut texture, &pixel_data)?;
         draw_to_canvas(&mut canvas, &mut texture)?;
         canvas.present();
