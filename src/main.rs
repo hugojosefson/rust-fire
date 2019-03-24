@@ -1,29 +1,15 @@
 extern crate sdl2;
 
-use rand::prelude::ThreadRng;
 use rand::Rng;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::keyboard::Mod;
 use sdl2::render::{Canvas, Texture};
 use sdl2::video::Window;
-
-const WIDTH_U32: u32 = 320;
-const WIDTH: usize = WIDTH_U32 as usize;
-const HEIGHT_U32: u32 = 200;
-const DATA_SIZE: usize = (WIDTH_U32 * (HEIGHT_U32 + 1)) as usize;
-const PIXEL_DATA_SIZE: usize = DATA_SIZE * 4 as usize;
-const SCREEN_SIZE: usize = (WIDTH_U32 * HEIGHT_U32) as usize;
-
-fn cycle_generator(rng: &mut ThreadRng, data: &mut [u32]) {
-    for i in SCREEN_SIZE..DATA_SIZE - 1 {
-        if data[i] < 255 {
-            data[i] = data[i] + 1
-        } else {
-            data[i] = rng.gen_range(64 + 16, 255)
-        }
-    }
-}
+mod constants;
+mod cycle_generator;
+use crate::constants::*;
+use crate::cycle_generator::cycle_generator;
 
 fn burn_screen(data: &mut [u32]) {
     for i in WIDTH + 1..SCREEN_SIZE - WIDTH - 1 {
