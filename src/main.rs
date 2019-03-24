@@ -67,6 +67,22 @@ fn draw_to_canvas(canvas: &mut Canvas<Window>, texture: &mut Texture) -> Result<
     canvas.copy(&texture, None, None)
 }
 
+fn is_bitmask_set(bitmask: u32, value: u32) -> bool {
+    value & bitmask == bitmask
+}
+
+fn is_maximized(window: &Window) -> bool {
+    is_bitmask_set(128, window.window_flags())
+}
+
+fn toggle_maximize(win: &mut Window) -> () {
+    if is_maximized(win) {
+        win.restore()
+    } else {
+        win.maximize()
+    }
+}
+
 fn fire() -> Result<(), String> {
     let mut rng = rand::thread_rng();
     let sdl_context = sdl2::init().unwrap();
@@ -98,6 +114,14 @@ fn fire() -> Result<(), String> {
                     keycode: Some(Keycode::Escape),
                     ..
                 } => break 'running,
+                Event::KeyDown {
+                    keycode: Some(Keycode::Return),
+                    ..
+                } => toggle_maximize(canvas.window_mut()),
+                Event::KeyDown {
+                    keycode: Some(Keycode::KpEnter),
+                    ..
+                } => toggle_maximize(canvas.window_mut()),
                 _ => {}
             }
         }
