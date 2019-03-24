@@ -17,8 +17,6 @@ fn get_value_from(
     }
 }
 
-const BURN_SPEED: u32 = 4;
-
 pub fn burn_screen(data: &mut [u32], generator: &[u32; GENERATOR_SIZE]) {
     for i in 0..DATA_SIZE {
         let mut value = get_value_from(data, generator, i, -1)
