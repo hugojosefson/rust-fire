@@ -10,3 +10,4 @@ pub const VISIBLE_HEIGHT_U32: u32 = VISIBLE_HEIGHT as u32;
 pub const DATA_SIZE: usize = WIDTH * HEIGHT;
 pub const VISIBLE_DATA_SIZE: usize = WIDTH * VISIBLE_HEIGHT;
 pub const PIXEL_DATA_SIZE: usize = VISIBLE_DATA_SIZE * 4;
+pub const PALETTE_SIZE: usize = 256;

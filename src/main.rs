@@ -14,7 +14,7 @@ use crate::burn_screen::burn_screen;
 use crate::constants::*;
 
 fn color_indices_to_pixel_data(
-    palette: &[[u8; 4]; 256],
+    palette: &[[u8; 4]; PALETTE_SIZE],
     color_indices: &[u32],
     pixel_data: &mut [u8],
 ) {
