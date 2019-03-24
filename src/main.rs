@@ -41,19 +41,16 @@ fn burn_screen(data: &mut [u32]) {
     }
 }
 
-fn color_indices_to_pixel_data(color_indices: &[u32], pixel_data: &mut [u8]) {
-    color_indices
-        .iter()
-        .enumerate()
-        .for_each(|(i, &color_index)| {
-            let pixels: [u8; 4] = [
-                (color_index >> 2) as u8,
-                (color_index >> 1) as u8,
-                (color_index) as u8,
-                0u8,
-            ];
-            pixel_data[i * 4..i * 4 + 4].copy_from_slice(&pixels);
-        });
+fn color_indices_to_pixel_data(
+    palette: &[[u8; 4]; 256],
+    color_indices: &[u32],
+    pixel_data: &mut [u8],
+) {
+    for i in 0..color_indices.len() - 1 {
+        let color_index = color_indices[i];
+        let pixel: [u8; 4] = palette[color_index as usize];
+        pixel_data[i * 4..i * 4 + 4].copy_from_slice(&pixel);
+    }
 }
 
 fn draw_to_texture(texture: &mut Texture, pixel_data: &[u8]) -> Result<(), String> {
@@ -84,6 +81,20 @@ fn toggle_maximize(win: &mut Window) -> () {
     }
 }
 
+fn create_palette() -> [[u8; 4]; 256] {
+    let mut palette_array: [[u8; 4]; 256] = [[0u8; 4]; 256];
+    for color_index in 0..255 {
+        let pixel: [u8; 4] = [
+            (color_index >> 2) as u8,
+            (color_index >> 1) as u8,
+            (color_index) as u8,
+            0u8,
+        ];
+        palette_array[color_index] = pixel;
+    }
+    return palette_array;
+}
+
 fn fire() -> Result<(), String> {
     let mut rng = rand::thread_rng();
     let sdl_context = sdl2::init().unwrap();
@@ -101,6 +112,7 @@ fn fire() -> Result<(), String> {
         .create_texture_streaming(None, WIDTH_U32, HEIGHT_U32)
         .map_err(|e| e.to_string())?;
 
+    let palette = create_palette();
     let mut data: [u32; DATA_SIZE] = [0; DATA_SIZE];
     let mut pixel_data: [u8; PIXEL_DATA_SIZE] = [0; PIXEL_DATA_SIZE];
     for i in SCREEN_SIZE..DATA_SIZE {
@@ -140,7 +152,7 @@ fn fire() -> Result<(), String> {
         cycle_generator(&mut rng, &mut data);
         burn_screen(&mut data);
 
-        color_indices_to_pixel_data(&data, &mut pixel_data);
+        color_indices_to_pixel_data(&palette, &data, &mut pixel_data);
         draw_to_texture(&mut texture, &pixel_data)?;
         draw_to_canvas(&mut canvas, &mut texture)?;
         canvas.present();
