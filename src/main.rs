@@ -6,24 +6,12 @@ use sdl2::keyboard::Keycode;
 use sdl2::keyboard::Mod;
 use sdl2::render::{Canvas, Texture};
 use sdl2::video::Window;
+mod burn_screen;
 mod constants;
 mod cycle_generator;
+use crate::burn_screen::burn_screen;
 use crate::constants::*;
 use crate::cycle_generator::cycle_generator;
-
-fn burn_screen(data: &mut [u32]) {
-    for i in WIDTH + 1..SCREEN_SIZE - WIDTH - 1 {
-        data[i] = (data[i - 1]
-            + data[i]
-            + data[i + 1]
-            + data[i + WIDTH - 1]
-            + data[i + WIDTH + 1]
-            + data[i + 2 * WIDTH - 1]
-            + data[i + 2 * WIDTH]
-            + data[i + 2 * WIDTH + 1])
-            / 8;
-    }
-}
 
 fn color_indices_to_pixel_data(
     palette: &[[u8; 4]; 256],
