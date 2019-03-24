@@ -26,18 +26,16 @@ fn cycle_generator(rng: &mut ThreadRng, data: &mut [u32]) {
 }
 
 fn burn_screen(data: &mut [u32]) {
-    let mut sum: u32;
     for i in WIDTH + 1..SCREEN_SIZE - WIDTH - 1 {
-        sum = data[i - 1];
-        sum += data[i];
-        sum += data[i + 1];
-        sum += data[i + WIDTH - 1];
-        sum += data[i + WIDTH + 1];
-        sum += data[i + 2 * WIDTH - 1];
-        sum += data[i + 2 * WIDTH];
-        sum += data[i + 2 * WIDTH + 1];
-        sum /= 8;
-        data[i] = sum
+        data[i] = (data[i - 1]
+            + data[i]
+            + data[i + 1]
+            + data[i + WIDTH - 1]
+            + data[i + WIDTH + 1]
+            + data[i + 2 * WIDTH - 1]
+            + data[i + 2 * WIDTH]
+            + data[i + 2 * WIDTH + 1])
+            / 8;
     }
 }
 
