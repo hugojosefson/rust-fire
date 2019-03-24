@@ -1,8 +1,4 @@
-#![feature(proc_macro_hygiene)]
-extern crate flame;
 extern crate sdl2;
-#[macro_use]
-extern crate flamer;
 
 use rand::prelude::ThreadRng;
 use rand::Rng;
@@ -18,7 +14,6 @@ const DATA_SIZE: usize = (WIDTH_U32 * (HEIGHT_U32 + 1)) as usize;
 const PIXEL_DATA_SIZE: usize = DATA_SIZE * 4 as usize;
 const SCREEN_SIZE: usize = (WIDTH_U32 * HEIGHT_U32) as usize;
 
-#[flame]
 fn cycle_generator(rng: &mut ThreadRng, data: &mut [u32]) {
     for i in SCREEN_SIZE..DATA_SIZE - 1 {
         if data[i] < 255 {
@@ -29,7 +24,6 @@ fn cycle_generator(rng: &mut ThreadRng, data: &mut [u32]) {
     }
 }
 
-#[flame]
 fn burn_screen(data: &mut [u32]) {
     let mut sum: u32;
     for i in WIDTH + 1..SCREEN_SIZE - WIDTH - 1 {
@@ -46,7 +40,6 @@ fn burn_screen(data: &mut [u32]) {
     }
 }
 
-#[flame]
 fn color_indices_to_pixel_data(color_indices: &[u32], pixel_data: &mut [u8]) {
     color_indices
         .iter()
@@ -62,7 +55,6 @@ fn color_indices_to_pixel_data(color_indices: &[u32], pixel_data: &mut [u8]) {
         });
 }
 
-#[flame]
 fn draw_to_texture(texture: &mut Texture, pixel_data: &[u8]) -> Result<(), String> {
     texture
         .update(None, pixel_data, WIDTH * 4)
@@ -71,12 +63,10 @@ fn draw_to_texture(texture: &mut Texture, pixel_data: &[u8]) -> Result<(), Strin
     Ok(())
 }
 
-#[flame]
 fn draw_to_canvas(canvas: &mut Canvas<Window>, texture: &mut Texture) -> Result<(), String> {
     canvas.copy(&texture, None, None)
 }
 
-#[flame]
 fn fire() -> Result<(), String> {
     let mut rng = rand::thread_rng();
     let sdl_context = sdl2::init().unwrap();
@@ -123,9 +113,5 @@ fn fire() -> Result<(), String> {
 }
 
 pub fn main() -> Result<(), String> {
-    let result = fire();
-
-    flame::dump_stdout();
-
-    result
+    fire()
 }
