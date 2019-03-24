@@ -1,6 +1,6 @@
+#![feature(clamp)]
 extern crate sdl2;
 
-use rand::Rng;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::keyboard::Mod;
@@ -8,10 +8,9 @@ use sdl2::render::{Canvas, Texture};
 use sdl2::video::Window;
 mod burn_screen;
 mod constants;
-mod cycle_generator;
+mod generator;
 use crate::burn_screen::burn_screen;
 use crate::constants::*;
-use crate::cycle_generator::cycle_generator;
 
 fn color_indices_to_pixel_data(
     palette: &[[u8; 4]; 256],
@@ -85,11 +84,9 @@ fn fire() -> Result<(), String> {
         .map_err(|e| e.to_string())?;
 
     let palette = create_palette();
+    let mut generator: [u32; WIDTH] = generator::new(&mut rng);
     let mut data: [u32; DATA_SIZE] = [0; DATA_SIZE];
     let mut pixel_data: [u8; PIXEL_DATA_SIZE] = [0; PIXEL_DATA_SIZE];
-    for i in SCREEN_SIZE..DATA_SIZE {
-        data[i] = rng.gen_range(64 + 16, 255);
-    }
     let mut event_pump = sdl_context.event_pump().unwrap();
     'running: loop {
         for event in event_pump.poll_iter() {
@@ -121,8 +118,8 @@ fn fire() -> Result<(), String> {
             }
         }
 
-        cycle_generator(&mut rng, &mut data);
-        burn_screen(&mut data);
+        generator::cycle(&mut rng, &mut generator);
+        burn_screen(&mut data, &generator);
 
         color_indices_to_pixel_data(&palette, &data, &mut pixel_data);
         draw_to_texture(&mut texture, &pixel_data)?;
