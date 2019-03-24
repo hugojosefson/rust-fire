@@ -9,6 +9,7 @@ use sdl2::video::Window;
 mod burn_screen;
 mod constants;
 mod generator;
+mod palette;
 use crate::burn_screen::burn_screen;
 use crate::constants::*;
 
@@ -52,20 +53,6 @@ fn toggle_maximize(win: &mut Window) -> () {
     }
 }
 
-fn create_palette() -> [[u8; 4]; 256] {
-    let mut palette_array: [[u8; 4]; 256] = [[0u8; 4]; 256];
-    for color_index in 0..255 {
-        let pixel: [u8; 4] = [
-            (color_index >> 2) as u8,
-            (color_index >> 1) as u8,
-            (color_index) as u8,
-            0u8,
-        ];
-        palette_array[color_index] = pixel;
-    }
-    return palette_array;
-}
-
 fn fire() -> Result<(), String> {
     let mut rng = rand::thread_rng();
     let sdl_context = sdl2::init().unwrap();
@@ -83,7 +70,7 @@ fn fire() -> Result<(), String> {
         .create_texture_streaming(None, WIDTH_U32, VISIBLE_HEIGHT_U32)
         .map_err(|e| e.to_string())?;
 
-    let palette = create_palette();
+    let palette = palette::new();
     let mut generator: [u32; GENERATOR_SIZE] = generator::new(&mut rng);
     let mut data: [u32; DATA_SIZE] = [0; DATA_SIZE];
     let mut pixel_data: [u8; PIXEL_DATA_SIZE] = [0; PIXEL_DATA_SIZE];
