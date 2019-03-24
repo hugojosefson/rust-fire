@@ -4,6 +4,7 @@ use rand::prelude::ThreadRng;
 use rand::Rng;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
+use sdl2::keyboard::Mod;
 use sdl2::render::{Canvas, Texture};
 use sdl2::video::Window;
 
@@ -116,12 +117,22 @@ fn fire() -> Result<(), String> {
                 } => break 'running,
                 Event::KeyDown {
                     keycode: Some(Keycode::Return),
+                    keymod,
                     ..
-                } => toggle_maximize(canvas.window_mut()),
+                } => {
+                    if keymod == Mod::LALTMOD | Mod::NUMMOD {
+                        toggle_maximize(canvas.window_mut());
+                    }
+                }
                 Event::KeyDown {
                     keycode: Some(Keycode::KpEnter),
+                    keymod,
                     ..
-                } => toggle_maximize(canvas.window_mut()),
+                } => {
+                    if keymod == Mod::LALTMOD | Mod::NUMMOD {
+                        toggle_maximize(canvas.window_mut());
+                    }
+                }
                 _ => {}
             }
         }
