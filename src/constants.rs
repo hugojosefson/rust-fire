@@ -1,5 +1,7 @@
 pub const WIDTH: usize = 320 as usize;
 pub const HEIGHT: usize = 200 as usize;
+pub const GENERATOR_HEIGHT: usize = 2;
+pub const GENERATOR_SIZE: usize = WIDTH * GENERATOR_HEIGHT;
 
 pub const WIDTH_U32: u32 = WIDTH as u32;
 pub const HEIGHT_U32: u32 = HEIGHT as u32;

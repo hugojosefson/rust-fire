@@ -84,7 +84,7 @@ fn fire() -> Result<(), String> {
         .map_err(|e| e.to_string())?;
 
     let palette = create_palette();
-    let mut generator: [u32; WIDTH] = generator::new(&mut rng);
+    let mut generator: [u32; GENERATOR_SIZE] = generator::new(&mut rng);
     let mut data: [u32; DATA_SIZE] = [0; DATA_SIZE];
     let mut pixel_data: [u8; PIXEL_DATA_SIZE] = [0; PIXEL_DATA_SIZE];
     let mut event_pump = sdl_context.event_pump().unwrap();
