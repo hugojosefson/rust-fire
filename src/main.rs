@@ -1,12 +1,15 @@
+#![feature(proc_macro_hygiene)]
+extern crate flame;
 extern crate sdl2;
+#[macro_use]
+extern crate flamer;
 
 use rand::prelude::ThreadRng;
 use rand::Rng;
 use sdl2::event::Event;
-use sdl2::gfx::primitives::DrawRenderer;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
-use sdl2::render::Canvas;
+use sdl2::render::{Canvas, Texture};
 use sdl2::video::Window;
 
 const WIDTH_U32: u32 = 320;
@@ -19,6 +22,7 @@ fn color_from_index(ci: u8) -> Color {
     Color::from((ci, ci >> 1, ci >> 2))
 }
 
+#[flame]
 fn cycle_generator(rng: &mut ThreadRng, data: &mut Vec<u8>) {
     for i in SCREEN_SIZE..DATA_SIZE - 1 {
         if data[i] < 255 {
@@ -29,6 +33,7 @@ fn cycle_generator(rng: &mut ThreadRng, data: &mut Vec<u8>) {
     }
 }
 
+#[flame]
 fn burn_screen(data: &mut Vec<u8>) {
     for i in WIDTH + 1..SCREEN_SIZE - WIDTH - 2 {
         let up_left = data[i - 1];
@@ -52,34 +57,44 @@ fn burn_screen(data: &mut Vec<u8>) {
     }
 }
 
-fn draw(canvas: &Canvas<Window>, data: &Vec<u8>) -> Result<(), String> {
-    for i in 0..DATA_SIZE - 1 {
-        let color = color_from_index(data[i]);
-        let x: i16 = ((i % WIDTH) * 2) as i16;
-        let y: i16 = ((i / WIDTH) * 2) as i16;
+#[flame]
+fn draw(canvas: &mut Canvas<Window>, data: &Vec<u8>) -> Result<(), String> {
+    let pixel_data: Vec<u8> = data
+        .iter()
+        .flat_map(|&i| {
+            let color = color_from_index(i);
+            [
+                color.r.clone(),
+                color.g.clone(),
+                color.b.clone(),
+                color.a.clone(),
+            ]
+            .iter()
+        })
+        .map(|&byte| byte)
+        .collect();
 
-        canvas.pixel(x, y, color)?;
-        canvas.pixel(x, y + 1, color)?;
-        canvas.pixel(x + 1, y + 1, color)?;
-        canvas.pixel(x + 1, y, color)?;
-    }
+    let texture: Texture = canvas
+        .texture_creator()
+        .create_texture_target(None, WIDTH_U32, HEIGHT_U32)
+        .map_err(|e| e.to_string())?;
+
+    texture.update(None, pixel_data.as_slice(), WIDTH);
     Ok(())
 }
 
-pub fn main() -> Result<(), String> {
+#[flame]
+fn fire() -> Result<(), String> {
     let mut rng = rand::thread_rng();
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
-
     let window = video_subsystem
         .window("fire", WIDTH_U32 * 2 + 1, HEIGHT_U32 * 2 + 1)
         .fullscreen()
         .build()
         .unwrap();
-
     let mut canvas = window.into_canvas().present_vsync().build().unwrap();
     let mut data: Vec<u8> = Vec::with_capacity(DATA_SIZE);
-
     for i in 0..DATA_SIZE - 1 {
         let color_index = if i < SCREEN_SIZE {
             0
@@ -88,7 +103,6 @@ pub fn main() -> Result<(), String> {
         };
         data.insert(i, color_index);
     }
-
     let mut event_pump = sdl_context.event_pump().unwrap();
     'running: loop {
         for event in event_pump.poll_iter() {
@@ -104,9 +118,18 @@ pub fn main() -> Result<(), String> {
 
         cycle_generator(&mut rng, &mut data);
         burn_screen(&mut data);
-        draw(&canvas, &data)?;
+        draw(&mut canvas, &data)?;
 
         canvas.present();
     }
     Ok(())
+}
+
+pub fn main() -> Result<(), String> {
+    let result = fire();
+
+    //    flame::dump_html(&mut File::create("target/flame-graph.html").unwrap()).unwrap();
+    flame::dump_stdout();
+
+    result
 }
