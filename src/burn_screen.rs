@@ -28,7 +28,7 @@ pub fn burn_screen(data: &mut [u32], generator: &[u32; GENERATOR_SIZE]) {
             + get_value_from(data, generator, i, (2 * WIDTH) as isize)
             + get_value_from(data, generator, i, (2 * WIDTH + 1) as isize);
 
-        value = if value > BURN_SPEED {
+        value = if value > BURN_SPEED * 2 {
             value - BURN_SPEED
         } else {
             0
