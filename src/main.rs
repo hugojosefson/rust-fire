@@ -1,16 +1,28 @@
 extern crate sdl2;
 
+#[macro_use]
+extern crate rust_embed;
+
+#[derive(RustEmbed)]
+#[folder = "assets/"]
+struct Asset;
+
+use rodio::Source;
 use sdl2::event::{Event, WindowEvent};
 use sdl2::keyboard::Keycode;
 use sdl2::keyboard::Mod;
 use sdl2::render::{Canvas, Texture};
 use sdl2::video::Window;
+
 mod burn_screen;
 mod constants;
 mod generator;
 mod palette;
+
 use crate::burn_screen::burn_screen;
 use crate::constants::*;
+use std::borrow::Cow;
+use std::io::BufReader;
 
 fn color_indices_to_pixel_data(
     palette: &[[u8; 4]; PALETTE_SIZE],
@@ -53,6 +65,18 @@ fn toggle_maximize(win: &mut Window) -> () {
 }
 
 fn fire() -> Result<(), String> {
+    let device = rodio::default_output_device().unwrap();
+
+    let file: &[u8] = match Asset::get("fire3.mp3") {
+        Some(content) => match content {
+            Cow::Borrowed(bytes) => bytes.into(),
+            Cow::Owned(bytes) => bytes.into(),
+        },
+        None => return Err(format!("File {} not found.", "fire3.mp3")),
+    };
+    let source = rodio::Decoder::new(BufReader::new(file)).unwrap();
+    rodio::play_raw(&device, source.convert_samples());
+
     let mut rng = rand::thread_rng();
     let sdl_context = sdl2::init().unwrap();
     let video_subsystem = sdl_context.video().unwrap();

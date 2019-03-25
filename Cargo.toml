@@ -6,6 +6,8 @@ edition = "2018"
 
 [dependencies]
 rand = "0.6.5"
+rust-embed="4.3.0"
+rodio = "0.8.1"
 
 [dependencies.sdl2]
 version = "0.32.1"
