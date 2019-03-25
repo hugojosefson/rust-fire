@@ -18,7 +18,7 @@ fn color_indices_to_pixel_data(
     color_indices: &[u32],
     pixel_data: &mut [u8],
 ) {
-    for i in 0..color_indices.len() - 1 {
+    for i in 0..color_indices.len() {
         let color_index = color_indices[i];
         let pixel: [u8; 4] = palette[color_index as usize];
         pixel_data[i * 4..i * 4 + 4].copy_from_slice(&pixel);
