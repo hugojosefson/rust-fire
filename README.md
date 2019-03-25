@@ -34,3 +34,7 @@ Keys:
 
 - `Alt-Enter`: Toggle maximized window
 - `Esc`: Exit
+
+## Screengrab
+
+![fire-1 0 1](https://user-images.githubusercontent.com/67230/54908538-6aa3a700-4ee8-11e9-8dcc-1304767e0226.gif)
