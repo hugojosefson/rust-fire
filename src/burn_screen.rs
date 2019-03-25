@@ -1,5 +1,17 @@
 use crate::constants::*;
 
+fn clamp(index: isize, max: usize) -> usize {
+    if index < 0 as isize {
+        0
+    } else {
+        if index > max as isize {
+            max
+        } else {
+            index as usize
+        }
+    }
+}
+
 fn get_value_from(
     data: &[u32],
     generator: &[u32; GENERATOR_SIZE],
@@ -8,11 +20,11 @@ fn get_value_from(
 ) -> u32 {
     let index: isize = index as isize + offset;
     if index < DATA_SIZE as isize {
-        let index: usize = index.clamp(0, (DATA_SIZE - 1) as isize) as usize;
+        let index: usize = clamp(index, DATA_SIZE - 1);
         data[index]
     } else {
         let index = index - DATA_SIZE as isize;
-        let index: usize = index.clamp(0, (GENERATOR_SIZE - 1) as isize) as usize;
+        let index: usize = clamp(index, GENERATOR_SIZE - 1);
         generator[index]
     }
 }

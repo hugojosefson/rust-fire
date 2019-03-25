@@ -1,4 +1,3 @@
-#![feature(clamp)]
 extern crate sdl2;
 
 use sdl2::event::Event;
