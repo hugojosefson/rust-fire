@@ -1,6 +1,6 @@
 extern crate sdl2;
 
-use sdl2::event::Event;
+use sdl2::event::{Event, WindowEvent};
 use sdl2::keyboard::Keycode;
 use sdl2::keyboard::Mod;
 use sdl2::render::{Canvas, Texture};
@@ -74,6 +74,10 @@ fn fire() -> Result<(), String> {
     let mut data: [u32; DATA_SIZE] = [0; DATA_SIZE];
     let mut pixel_data: [u8; PIXEL_DATA_SIZE] = [0; PIXEL_DATA_SIZE];
     let mut event_pump = sdl_context.event_pump().unwrap();
+
+    let (x, y) = canvas.window().size();
+    let mut window_size = (x as i32, y as i32);
+    let mut is_mouse_down: bool = false;
     'running: loop {
         for event in event_pump.poll_iter() {
             match event {
@@ -100,6 +104,24 @@ fn fire() -> Result<(), String> {
                         toggle_maximize(canvas.window_mut());
                     }
                 }
+                Event::Window {
+                    win_event: WindowEvent::Resized(x, y),
+                    ..
+                } => {
+                    window_size = (x, y);
+                }
+                Event::MouseButtonDown { x, y, .. } => {
+                    is_mouse_down = true;
+                    paint_block(&mut data, &window_size, x, y);
+                }
+                Event::MouseButtonUp { .. } => {
+                    is_mouse_down = false;
+                }
+                Event::MouseMotion { x, y, .. } => {
+                    if is_mouse_down {
+                        paint_block(&mut data, &window_size, x, y);
+                    }
+                }
                 _ => {}
             }
         }
@@ -113,6 +135,23 @@ fn fire() -> Result<(), String> {
         canvas.present();
     }
     Ok(())
+}
+
+fn paint_block(data: &mut [u32; DATA_SIZE], window_size: &(i32, i32), x: i32, y: i32) {
+    let data_x = x as usize * WIDTH / window_size.0 as usize;
+    let data_y = y as usize * VISIBLE_HEIGHT / window_size.1 as usize;
+    for dx in 0usize..7usize {
+        for dy in 0usize..7usize {
+            paint_pixel(data, data_x + dx, data_y + dy);
+        }
+    }
+}
+
+fn paint_pixel(data: &mut [u32; DATA_SIZE], x: usize, y: usize) {
+    let index = x + y * WIDTH;
+    if index < DATA_SIZE {
+        data[index] = 0xffu32;
+    }
 }
 
 pub fn main() -> Result<(), String> {
