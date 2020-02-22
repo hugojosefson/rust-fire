@@ -24,6 +24,12 @@ On Ubuntu, you can install the libraries with:
 sudo apt install -y libsdl2-dev libsdl2-gfx-dev
 ```
 
+On Fedora, install the libraries with:
+
+```bash
+sudo dnf install -y SDL2-devel SDL2_gfx-devel
+```
+
 ## Usage
 
 ```bash
