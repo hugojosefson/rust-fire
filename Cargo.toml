@@ -5,8 +5,8 @@ authors = ["Hugo Josefson <hugo@josefson.org>"]
 edition = "2018"
 
 [dependencies]
-rand = "0.6.5"
+rand = "0.7.3"
 
 [dependencies.sdl2]
-version = "0.32.1"
+version = "0.33.0"
 features = ["gfx"]
