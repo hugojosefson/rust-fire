@@ -1,7 +1,7 @@
 use crate::constants::*;
 
 fn clamp(index: isize, max: usize) -> usize {
-    if index < 0 as isize {
+    if index < 0 {
         0
     } else {
         if index > max as isize {
