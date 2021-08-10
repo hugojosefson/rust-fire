@@ -5,7 +5,7 @@
 Reviving an old childhood memory, where I implemented a fire in
 `mov ax,13h; int 10h` graphics mode (320x200 at 8 bit indexed colors).
 
-A fun way to attempting to learn Rust!
+A fun way to attempt learning Rust!
 
 ## Prerequisites
 
