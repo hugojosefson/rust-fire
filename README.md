@@ -11,7 +11,7 @@ A fun way to attempting to learn Rust!
 
 ### Cargo and Rust
 
-https://www.rust-lang.org/tools/install
+<https://www.rust-lang.org/tools/install>
 
 ### Libraries
 

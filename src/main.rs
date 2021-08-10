@@ -33,7 +33,7 @@ fn draw_to_texture(texture: &mut Texture, pixel_data: &[u8]) -> Result<(), Strin
 }
 
 fn draw_to_canvas(canvas: &mut Canvas<Window>, texture: &mut Texture) -> Result<(), String> {
-    canvas.copy(&texture, None, None)
+    canvas.copy(texture, None, None)
 }
 
 fn is_bitmask_set(bitmask: u32, value: u32) -> bool {
@@ -44,7 +44,7 @@ fn is_maximized(window: &Window) -> bool {
     is_bitmask_set(128, window.window_flags())
 }
 
-fn toggle_maximize(win: &mut Window) -> () {
+fn toggle_maximize(win: &mut Window) {
     if is_maximized(win) {
         win.restore()
     } else {

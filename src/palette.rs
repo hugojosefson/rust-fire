@@ -18,5 +18,5 @@ pub fn new() -> [[u8; 4]; PALETTE_SIZE] {
         let pixel: [u8; 4] = [clamp(blue), clamp(green), clamp(red), 0u8];
         palette_array[color_index] = pixel;
     }
-    return palette_array;
+    palette_array
 }

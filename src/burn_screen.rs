@@ -2,13 +2,13 @@ use crate::constants::*;
 
 fn clamp(index: isize, max: usize) -> usize {
     if index < 0 {
-        0
+        return 0;
+    }
+
+    if index > max as isize {
+        max
     } else {
-        if index > max as isize {
-            max
-        } else {
-            index as usize
-        }
+        index as usize
     }
 }
 
