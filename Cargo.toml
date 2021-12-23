@@ -1,6 +1,6 @@
 [package]
 name = "fire"
-version = "1.0.6"
+version = "1.0.7"
 authors = ["Hugo Josefson <hugo@josefson.org>"]
 edition = "2018"
 
